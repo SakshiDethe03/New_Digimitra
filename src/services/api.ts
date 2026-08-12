@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { INITIAL_MOCK_COURSES, INITIAL_MOCK_PROGRESS, INITIAL_MOCK_USER, updateMockProgress, updateWatchProgress } from '@/data/mockCourses';
+import { generateCertificatePdf } from '@/lib/generateCertificatePdf';
 
 const API = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
@@ -100,8 +101,23 @@ function getMockFallback(config: any) {
   }
 
   if (url.includes('/certificate')) {
-    const dummyBlob = new Blob(["Sample Certificate PDF Content"], { type: "application/pdf" });
-    return { data: dummyBlob, status: 200, statusText: 'OK', headers: {}, config };
+    const match = url.match(/\/certificate\/([^/?]+)/);
+    const courseId = match?.[1];
+    const course = INITIAL_MOCK_COURSES.find(c => c._id === courseId || c.id === courseId) || INITIAL_MOCK_COURSES[0];
+
+    let userName = 'Student';
+    try {
+      const userInfo = localStorage.getItem('userInfo');
+      if (userInfo) {
+        const parsed = JSON.parse(userInfo);
+        if (parsed?.name) userName = parsed.name;
+      }
+    } catch (e) {
+      // ignore JSON error
+    }
+
+    const pdfBlob = generateCertificatePdf(userName, course?.title?.en || 'Course');
+    return { data: pdfBlob, status: 200, statusText: 'OK', headers: {}, config };
   }
 
   return null;

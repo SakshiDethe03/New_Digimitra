@@ -135,12 +135,14 @@ export const VideoPlayer = () => {
     try {
       toast.info(language === "en" ? "Generating certificate..." : "प्रमाणपत्र तयार होत आहे...");
       const response = await API.get(`/certificate/${id}`, { responseType: 'blob' });
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
       const link = document.createElement('a');
       link.href = url;
       link.setAttribute('download', `certificate-${course.title.en}.pdf`);
       document.body.appendChild(link);
       link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
       toast.success(language === "en" ? "Certificate downloaded!" : "प्रमाणपत्र डाउनलोड झाले!");
     } catch (error) {
       toast.error("Error downloading certificate");
