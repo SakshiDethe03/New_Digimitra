@@ -1,6 +1,6 @@
 streamlit
 langchain_groq
-langchain-openai
+langchain-openrouter
 python-dotenv
 langchain
 langchain_core
